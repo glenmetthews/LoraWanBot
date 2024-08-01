@@ -26,8 +26,9 @@ async def create_criteria(
             axis=axis,
         )
         session.add(criteria)
+        await session.flush()
         await session.commit()
-        return await session.refresh(criteria)
+        return criteria
 
 
 async def delete_criteria(criteria_id: int) -> None:

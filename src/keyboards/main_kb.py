@@ -7,6 +7,7 @@ async def main_kb():
             [
                 KeyboardButton(text="Критерии"),
                 KeyboardButton(text="Сервисная информация"),
+                KeyboardButton(text="Админская"),
             ],
         ],
         resize_keyboard=True,

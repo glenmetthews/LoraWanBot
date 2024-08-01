@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from database.init_db import async_session
 from database import User
@@ -28,3 +28,16 @@ async def get_allowed_users():
     async with async_session() as session:
         result = await session.scalars(select(User).where(User.is_staff.is_(True)))
         return result
+
+
+async def get_all_users():
+    async with async_session() as session:
+        result = await session.scalars(select(User))
+        return result
+
+
+async def add_admin_user(user_id: int) -> None:
+    async with async_session() as session:
+        stmt = update(User).where(User.id == user_id).values(is_staff=True)
+        await session.execute(stmt)
+        await session.commit()

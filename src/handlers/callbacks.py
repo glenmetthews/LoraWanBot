@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from repositories.criteria import get_criteria_list, delete_criteria
+from repositories.users import add_admin_user
 from services.api_requests import get_device_list
 from keyboards.criteria_kbs import (
     device_list_kb,
@@ -114,3 +115,13 @@ async def delete_criteria_callback(callback: types.CallbackQuery):
     await delete_criteria(criteria_id=int(criteria_id))
 
     await callback.message.answer(text="Критерий удален")
+
+
+@router.callback_query(StateFilter(None), F.data.startswith("user_"))
+async def add_admin_user_callback(callback: types.CallbackQuery):
+
+    user_id = callback.data.split("_")[1]
+
+    await add_admin_user(user_id=int(user_id))
+
+    await callback.message.answer(text="Права добавлены")

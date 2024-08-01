@@ -17,7 +17,7 @@ async def setup_scheduler(bot: Bot, scheduler: AsyncIOScheduler):
             name=criteria.dev_name,
             func=check_criteria,
             trigger="interval",
-            minutes=15,
+            minutes=1,
             kwargs={"bot": bot, "criteria": criteria},
         )
 

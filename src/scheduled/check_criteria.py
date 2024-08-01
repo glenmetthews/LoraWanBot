@@ -5,6 +5,7 @@ from aiogram import Bot
 
 from database import Criteria
 from repositories.users import get_allowed_users
+from repositories.overs import get_over, create_over
 from services.api_requests import get_last_tilt_data
 
 
@@ -24,13 +25,22 @@ async def check_criteria(bot: Bot, criteria: Criteria):
         )
 
         if not (criteria.low_level < data[criteria.axis] < criteria.high_level):
-            for user in allowed_users:
-                await bot.send_message(
-                    text=f"{criteria.dev_name} вышел из диапазона [{criteria.low_level} - {criteria.high_level}].\n"
-                    f"Время: {datetime.fromisoformat(data['time'].replace('Z', '')) + timedelta(hours=3)}\n"
-                    f"Значение: {data[criteria.axis]}\n ",
-                    chat_id=user.tg_id,
+            if not await get_over(
+                criteria=criteria, time=datetime.fromisoformat(data["time"])
+            ):
+                await create_over(
+                    criteria=criteria,
+                    time=datetime.fromisoformat(data["time"]),
+                    value=data[criteria.axis],
                 )
+                for user in allowed_users:
+                    await bot.send_message(
+                        text=f"{criteria.dev_name} вышел из диапазона [{criteria.low_level} - {criteria.high_level}].\n"
+                        f"Время: {datetime.fromisoformat(data['time'].replace('Z', '')) + timedelta(hours=3)}\n"
+                        f"Значение: {data[criteria.axis]}\n ",
+                        chat_id=user.tg_id,
+                    )
+                logging.info("Новая запись")
             logging.info("Превышение")
 
     else:

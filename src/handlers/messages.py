@@ -6,10 +6,11 @@ from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards.criteria_kbs import choosing_action_with_criteria_kb
-from scheduled import scheduler
-from states import CriteriaCreating
-from scheduled.check_criteria import check_criteria
+from keyboards.users import choosing_user
 from repositories.criteria import create_criteria
+from repositories.users import get_all_users
+from scheduled.check_criteria import check_criteria
+from states import CriteriaCreating
 
 router = Router()
 
@@ -18,8 +19,17 @@ router = Router()
 async def start_command(message: Message):
 
     await message.answer(
-        text="Выбери нужное... Если осмелишься",
+        text="Выбери нужное.",
         reply_markup=await choosing_action_with_criteria_kb(),
+    )
+
+
+@router.message(F.text == "Админская")
+async def admin_handler(message: Message):
+    users = await get_all_users()
+    await message.answer(
+        text="Выбери кому дать права",
+        reply_markup=await choosing_user(users),
     )
 
 
@@ -42,6 +52,7 @@ async def range_criteria_handler(
         axis=user_data["axis"],
     )
     logging.info(f"Criteria Creating: {new_criteria}")
+
     await state.clear()
 
     scheduler.add_job(
